@@ -29,9 +29,10 @@ namespace mysqlIRCbot
             try {
                 //MySqlDataReader result = query.ExecuteReader();
                 //result.Close();
+				//string topic1 = result.GetString(1);
                 //connection.Close();
 				string lulzytime = Convert.ToString(number);
-				string topic1 = "this is where a topic would be. the random number generated to pick the topic was: " + lulzytime;
+				string topic1 = "the random number generated to pick the topic was: " + lulzytime;
 				return topic1;
             }
             catch {
