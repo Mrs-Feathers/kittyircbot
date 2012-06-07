@@ -6,7 +6,7 @@ namespace mysqlIRCbot
 {
 
     public class databaseMYSQL  {
-		public  connection = new MySqlConnection();
+		public MySqlConnection connection = new MySqlConnection();
    
         /* Establish connection to MYSQL server */
         public databaseMYSQL (String hostname, int port, String username, String password, String database) {
