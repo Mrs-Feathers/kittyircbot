@@ -1,14 +1,14 @@
 using System;
 using MySql.Data;
 using MySql.Data.MySqlClient;
+using System.Data;
 
 namespace mysqlIRCbot
 {
 
     public class databaseMYSQL  {
-		public  connection = new MySqlConnection();
-   
-        /* Establish connection to MYSQL server */
+		public MySqlConnection connection = new MySqlConnection();
+
         public databaseMYSQL (String hostname, int port, String username, String password, String database) {
             try {  
              connection.ConnectionString = "server=" + hostname + ";" +
@@ -22,31 +22,21 @@ namespace mysqlIRCbot
              }
        
         }
-        /* Add new user to MYSQL database & disconnect */
-        public void adduser(String user) {
-        MySqlCommand query = connection.CreateCommand();
-        query.CommandText = "INSERT INTO irc (user) VALUES ('" + user + "')";  
+		
+		public string topic(int number) {
+        //MySqlCommand query = connection.CreateCommand();
+			//query.CommandText = "SELECT topic WHERE id = " + number + ";";  
             try {
-                MySqlDataReader result = query.ExecuteReader();
-                result.Close();
-                connection.Close();
+                //MySqlDataReader result = query.ExecuteReader();
+                //result.Close();
+                //connection.Close();
+				string lulzytime = Convert.ToString(number);
+				string topic1 = "this is where a topic would be. the random number generated to pick the topic was: " + lulzytime;
+				return topic1;
             }
             catch {
             Console.WriteLine("ERROR: Unable to query database");
-            }
-        }
-       
-        /* Remove user from MYSQL database & disconnect */
-        public void removeuser(String user) {
-        MySqlCommand query = connection.CreateCommand();
-        query.CommandText = "DELETE from irc where user = '"+ user + "';";
-            try {
-                MySqlDataReader result = query.ExecuteReader();
-                result.Close();
-                connection.Close();
-            }
-            catch {
-            Console.WriteLine("ERROR: Unable to query database");
+			return "ERROR: Unable to query database";
             }
         }
     }

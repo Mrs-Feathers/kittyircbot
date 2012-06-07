@@ -11,12 +11,14 @@ namespace mysqlIRCbot
         public static String username, hostname, description, channel;
         public static String mysqlhostname, mysqlusername, mysqlpassword, database;
         public static int port, mysqlport;
-        // Storing of nicklist... make this the admin list who can give this bot commands
-        public static String[] nicks;
+		public static bool v = true;
+        public static String[] admins;
          
         public static TcpClient socket;
         public static StreamReader reader;
         public static StreamWriter writer;
+		
+		public static string[] interpretData;
    
         static void Main() {           
             try {
@@ -52,30 +54,25 @@ namespace mysqlIRCbot
  
         static void interpret(String data) {
         Console.WriteLine(data);
-        string[] interpretData = data.Split(' ');
+        interpretData = data.Split(' ');
             if(interpretData[0].Equals("PING")) onPing(interpretData[1]);
-			// If someone joins channel trigger join event.. if v = 1 then give them voice.
-            else if(interpretData[1].Equals("JOIN")) onJoin(interpretData[0]);
-            // If someone leaves channel trigger part event.. don't know if i need this
-            else if(interpretData[1].Equals("PART") || interpretData[1].Equals("QUIT")) onPart(interpretData[0]);
-			
+            else if(interpretData[1].Equals("JOIN")) onJoin(interpretData[0]);	
             else if(interpretData[1].Equals("PRIVMSG")) {
                 if (interpretData[2].Equals(channel)) {
+					if (interpretData.Length == 3) interpretData[4] = " ";
                     onPublicMessage(interpretData[3]);
                 }
                 else if (interpretData[2].Equals(username)) {
                     onPrivateMessage(interpretData[0], interpretData[3]);
                 }
             }
-            else if(interpretData[1].Equals("221")) write("JOIN " + channel, writer);
-            // If the server is sending the nicklist across add them to database.. don't need this
-            else if (interpretData[1].Equals("353")) nicks = interpretData;
-            // Write nicklist to MYSQL database
-            else if (interpretData[1].Equals("366")) {
+            else if(interpretData[1].Equals("421")) write("JOIN " + channel, writer); //221
+
+           /* else if (interpretData[1].Equals("366")) {
             Thread thread = new Thread(onNickList); //don'T need this.
             thread.Start();
-            }  
-    }
+            }  */
+   		}
    
         static void loadConfig() {
             try {
@@ -92,7 +89,7 @@ namespace mysqlIRCbot
                 else if (data[0].Equals("channel")) channel = data[1];
                 else if (data[0].Equals("port")) port = Int32.Parse(data[1]);
                 else if (data[0].Equals("mysqlport")) mysqlport = Int32.Parse(data[1]);
-				else if (data[0].Equals("admins")) admin = (data);
+				else if (data[0].Equals("admins")) admins = (data);
                 }
             }
             catch {
@@ -100,7 +97,6 @@ namespace mysqlIRCbot
             }
         }
 
-        /* Writing data to the IRC server */
         static void write(string data, StreamWriter writer) {
             try {
             writer.WriteLine(data);
@@ -111,21 +107,22 @@ namespace mysqlIRCbot
             Console.WriteLine("Error!");
             }
         }
-    /* On ping request write pong back to the server */
+
         static void onPing(string pong) {
             pong = "PONG " + pong;
             write(pong, writer);   
         }
-    /* On join to channel.. give them +v */
+		/* On join to channel.. give them +v if v = true; */
         static void onJoin(string data) {
             String[] working = data.Split('!');
             String user = working[0].Substring(1);
-            if (!user.Equals(username)) {
+			if (!user.Equals(username) && (v == true)) {
             write("PRIVMSG " + channel + " : Welcome to " + channel + ", " + user, writer);
             }
         }
 
-        static void onPublicMessage(string data) {
+		static void onPublicMessage(string data) { //, string datastuff
+			Console.WriteLine("1");
             data = data.Substring(1);
             if (data.Equals("!info")) write("PRIVMSG " + channel + " :kittyIRCbot v1.0 written by auroriumoxide katja.decuir@gmail.com", writer);
             else if (data.Equals("!time")) {
@@ -133,16 +130,31 @@ namespace mysqlIRCbot
             String now = String.Format("{0:F}", time);
             write("PRIVMSG " + channel + " : " + now, writer);
             }
-			else if (data.Equals("!help")) write("PRIVMSG " + channel + " : !help = this; !time = get the time; !info = get info;", writer);
-        }
+			else if (data.Equals("!help")) write("PRIVMSG " + channel + " : !help = this; !time = get the time; !info = get info; !v = turn +v on or off; !topic = get a random topic;", writer);
+			else if (data.Equals("!v")) {
+				if (interpretData[4].Equals("on")) v = true; else if (interpretData[4].Equals("off")) v = false; else write("PRIVMSG " + channel + " : use !v with on or off only", writer);
+        	}
+			else if (data.Equals("!gtfo")) {
+    			Environment.ExitCode = 0;
+     			Environment.Exit(0);
+  			}
+			else if (data.Equals("!topic")) write("PRIVMSG " + channel + " :" + lookuptopic(), writer);
+
+		}
 		
         static void onPrivateMessage(String user, String data) {
         String[] sender = user.Split('!');
         user = sender[0].Substring(1);
         write("PRIVMSG " + user + " :" + username + ": please use commands in " + channel, writer);
         }
-           
-    /* Don't need this */
+        
+        static string lookuptopic() {
+			int randomnumber = new Random().Next(1001);
+                databaseMYSQL dbconnect = new databaseMYSQL(mysqlhostname, mysqlport, mysqlusername, mysqlpassword, database);    
+			return dbconnect.topic(randomnumber);
+        }
+		
+    /* //Don't need this 
         static void onPart(String data) {
         String[] working = data.Split('!');
         String user = working[0].Substring(1);
@@ -150,16 +162,6 @@ namespace mysqlIRCbot
                 databaseMYSQL dbconnect = new databaseMYSQL(mysqlhostname, mysqlport, mysqlusername, mysqlpassword, database);
                 dbconnect.removeuser(user);
             }
-        }
-   
-    /* Don't need this */
-        static void onNickList() {
-            nicks[5] = nicks[5].Substring(1);
-            Console.Write("length" + nicks.Length);
-            for (int i = 1; i < (nicks.Length - 4); i++) {
-            databaseMYSQL dbconnect = new databaseMYSQL(mysqlhostname, mysqlport, mysqlusername, mysqlpassword, database);
-            if (!nicks[4+i].Equals(username)) dbconnect.adduser(nicks[4+i]);
-            }
-        }
+        } */
     }
 }
