@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using System.Net.Sockets;
 using System.Threading;
+using System.Security.Cryptography;
 
 namespace mysqlIRCbot
 {  
@@ -121,8 +122,7 @@ namespace mysqlIRCbot
             }
         }
 
-		static void onPublicMessage(string data) { //, string datastuff
-			Console.WriteLine("1");
+		static void onPublicMessage(string data) {
             data = data.Substring(1);
             if (data.Equals("!info")) write("PRIVMSG " + channel + " :kittyIRCbot v1.0 written by auroriumoxide katja.decuir@gmail.com", writer);
             else if (data.Equals("!time")) {
@@ -130,16 +130,19 @@ namespace mysqlIRCbot
             String now = String.Format("{0:F}", time);
             write("PRIVMSG " + channel + " : " + now, writer);
             }
-			else if (data.Equals("!help")) write("PRIVMSG " + channel + " : !help = this; !time = get the time; !info = get info; !v = turn +v on or off; !topic = get a random topic;", writer);
-			else if (data.Equals("!v")) {
-				if (interpretData[4].Equals("on")) v = true; else if (interpretData[4].Equals("off")) v = false; else write("PRIVMSG " + channel + " : use !v with on or off only", writer);
+			else if (data.Equals("!help")) write("PRIVMSG " + channel + " : !help = this; !time = get the time; !info = get info; !v = turn +v on or off; !topic = get a random topic; !gtfo = exit; !literacy [country] = tells you the literacy rate of a given country. tells you a random one if no country provided; !dice [number] = rolls a dice with [number] sides; !sha1 [string] = encrypts a string to a sha1 hash;", writer);
+			else if (data.Equals("!v")) { try {
+					if (interpretData[4].Equals("on")) v = true; else if (interpretData[4].Equals("off")) v = false; else write("PRIVMSG " + channel + " : use !v with on or off only", writer); }
+				catch { write("PRIVMSG " + channel + " : use !v with on or off only", writer); }
         	}
 			else if (data.Equals("!gtfo")) {
     			Environment.ExitCode = 0;
      			Environment.Exit(0);
   			}
 			else if (data.Equals("!topic")) write("PRIVMSG " + channel + " :" + lookuptopic(), writer);
-
+			else if (data.Equals("!literacy")) try { write("PRIVMSG " + channel + " :" + lookupliteracy(interpretData[4]), writer); } catch { write("PRIVMSG " + channel + " :" + lookupliteracy(null), writer); }
+			else if (data.Equals("!dice")) try { write("PRIVMSG " + channel + " :" + rolldice(Int32.Parse(interpretData[4])), writer); } catch { write("PRIVMSG " + channel + " :" + rolldice(0), writer); }
+			else if (data.Equals("!sha1")) try { write("PRIVMSG " + channel + " :" + sha1stuff(interpretData[4]), writer); } catch { write("PRIVMSG " + channel + " :Sha1 hashing failed.", writer); }
 		}
 		
         static void onPrivateMessage(String user, String data) {
@@ -154,14 +157,29 @@ namespace mysqlIRCbot
 			return dbconnect.topic(randomnumber);
         }
 		
-    /* //Don't need this 
-        static void onPart(String data) {
-        String[] working = data.Split('!');
-        String user = working[0].Substring(1);
-            if (!user.Equals(username)) {
-                databaseMYSQL dbconnect = new databaseMYSQL(mysqlhostname, mysqlport, mysqlusername, mysqlpassword, database);
-                dbconnect.removeuser(user);
+		static string lookupliteracy(string stuff) {
+			int randomnumber = new Random().Next(184);
+                databaseMYSQL dbconnect = new databaseMYSQL(mysqlhostname, mysqlport, mysqlusername, mysqlpassword, database);    
+			return dbconnect.literacy(randomnumber, stuff);
+        }
+		
+		static int rolldice(int sides) {
+			int diceroll;
+			if (sides == 0) diceroll = new Random().Next(7);
+				else diceroll = new Random().Next(sides + 1);
+			return diceroll;
+        }
+		
+		static string sha1stuff(string source) {
+			ASCIIEncoding enc = new ASCIIEncoding();
+            SHA1 sha = new SHA1CryptoServiceProvider();
+			byte[] me = sha.ComputeHash(enc.GetBytes(source));
+			string result = "0x";
+            for (int i = 0; i < me.Length; i++)
+            {
+                result += me[i].ToString("X2");
             }
-        } */
+			return result;
+        }
     }
 }

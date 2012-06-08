@@ -40,6 +40,28 @@ namespace mysqlIRCbot
 			return "ERROR: Unable to query database";
             }
         }
+		
+		public string literacy(int number, string lolstuffiscool) {
+			string country = ""; string rate = ""; string literacyrate = "ERROR: unset variable"; string CommandText;
+			if (lolstuffiscool == null) CommandText = "SELECT * FROM literacy WHERE id = " + number + ";";
+			else CommandText = "SELECT * FROM literacy WHERE country = '" + lolstuffiscool + "';";
+			MySqlCommand query = new MySqlCommand(CommandText,connection); //connection.CreateCommand(); 
+            try {
+				MySqlDataReader result = query.ExecuteReader();
+				while (result.Read()) {
+					country = (string)result["country"];
+					rate = (string)result["rate"];	
+				}
+				literacyrate = country + "'s literacy rate is " + rate + ".";
+				result.Close();
+                connection.Close();
+				return literacyrate;
+            }
+            catch (MySqlException e) {
+            Console.WriteLine("ERROR: " + e.ToString());
+			return "ERROR: " + e.ToString();
+            }
+        }
     }
 }
 
