@@ -98,7 +98,7 @@ namespace mysqlIRCbot
             }
         }
 
-        static void write(string data, StreamWriter writer) {
+        public static void write(string data, StreamWriter writer) {
             try {
             writer.WriteLine(data);
             Console.WriteLine(">>> " + data);
@@ -143,6 +143,7 @@ namespace mysqlIRCbot
 			else if (data.Equals("!literacy")) try { write("PRIVMSG " + channel + " :" + lookupliteracy(interpretData[4]), writer); } catch { write("PRIVMSG " + channel + " :" + lookupliteracy(null), writer); }
 			else if (data.Equals("!dice")) try { write("PRIVMSG " + channel + " :" + rolldice(Int32.Parse(interpretData[4])), writer); } catch { write("PRIVMSG " + channel + " :" + rolldice(0), writer); }
 			else if (data.Equals("!sha1")) try { write("PRIVMSG " + channel + " :" + sha1stuff(interpretData[4]), writer); } catch { write("PRIVMSG " + channel + " :Sha1 hashing failed.", writer); }
+			else if (data.Equals("!pi")) try { CalculatePI myPI = new CalculatePI (Int32.Parse(interpretData[4])); } catch { write("PRIVMSG " + channel + " :3.14", writer); }
 		}
 		
         static void onPrivateMessage(String user, String data) {

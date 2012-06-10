@@ -1,11 +1,11 @@
 ﻿<Properties GitUserInfo="UsingGIT">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="mysqlIRCbot\databaseMYSQL.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="mysqlIRCbot\Main.cs">
     <Files>
-      <File FileName="mysqlIRCbot\config.cfg" Line="13" Column="3" />
-      <File FileName="mysqlIRCbot\Main.cs" Line="122" Column="10" />
+      <File FileName="mysqlIRCbot\Main.cs" Line="133" Column="397" />
       <File FileName="mysqlIRCbot\AssemblyInfo.cs" Line="1" Column="1" />
-      <File FileName="mysqlIRCbot\databaseMYSQL.cs" Line="28" Column="65" />
+      <File FileName="mysqlIRCbot\databaseMYSQL.cs" Line="59" Column="14" />
+      <File FileName="mysqlIRCbot\config.cfg" Line="13" Column="3" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

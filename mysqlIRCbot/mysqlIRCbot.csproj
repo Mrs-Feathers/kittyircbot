@@ -44,6 +44,7 @@
     <Compile Include="databaseMYSQL.cs" />
     <Compile Include="phpfrontend.cs" />
     <Compile Include="config.cfg" />
+    <Compile Include="CalculatePI.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
