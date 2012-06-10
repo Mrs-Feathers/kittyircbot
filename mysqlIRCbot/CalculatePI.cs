@@ -13,7 +13,8 @@ namespace mysqlIRCbot
 		
     public CalculatePI (int stuff_) {
 			stuff = stuff_;
-			Thread pistuff = new Thread (new ThreadStart (this.kthnxpi()));
+			//Thread pistuff = new Thread (new ThreadStart (this.kthnxpi()));
+			Thread pistuff = new Thread (kthnxpi);
 			pistuff.Start ();
 	}
  
