@@ -7,13 +7,12 @@ namespace mysqlIRCbot
 		public static int stuff;
 		
 			public void kthnxpi () {
-			if ((stuff < 9001) && (stuff > 0)) ircbot.write("PRIVMSG " + ircbot.channel + " :" + Process(stuff), ircbot.writer);
-			else ircbot.write("PRIVMSG " + ircbot.channel + " :Upperlimit = 9001", ircbot.writer);
+			if ((stuff <= 416) && (stuff > 0)) ircbot.write("PRIVMSG " + ircbot.channel + " :" + Process(stuff), ircbot.writer);
+			else ircbot.write("PRIVMSG " + ircbot.channel + " :Lowerlimit = 0; Upperlimit = 416;", ircbot.writer);
 		}
 		
     public CalculatePI (int stuff_) {
 			stuff = stuff_;
-			//Thread pistuff = new Thread (new ThreadStart (this.kthnxpi()));
 			Thread pistuff = new Thread (kthnxpi);
 			pistuff.Start ();
 	}

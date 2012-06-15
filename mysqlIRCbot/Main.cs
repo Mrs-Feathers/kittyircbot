@@ -128,12 +128,12 @@ namespace mysqlIRCbot
             else if (data.Equals("!time")) {
             DateTime time = DateTime.Now;
             String now = String.Format("{0:F}", time);
-            write("PRIVMSG " + channel + " : " + now, writer);
+            write("PRIVMSG " + channel + " :" + now, writer);
             }
-			else if (data.Equals("!help")) write("PRIVMSG " + channel + " : !help = this; !time = get the time; !info = get info; !v = turn +v on or off; !topic = get a random topic; !gtfo = exit; !literacy [country] = tells you the literacy rate of a given country. tells you a random one if no country provided; !dice [number] = rolls a dice with [number] sides; !sha1 [string] = encrypts a string to a sha1 hash;", writer);
+			else if (data.Equals("!help")) write("PRIVMSG " + channel + " :!help = this; !time = get the time; !info = get info; !v = turn +v on or off; !topic = get a random topic; !gtfo = exit; !literacy [country] = tells you the literacy rate of a given country. tells you a random one if no country provided; !dice [number] = rolls a dice with [number] sides; !sha1 [string] = encrypts a string to a sha1 hash; !pi [number] = calculates pi to a given number;", writer);
 			else if (data.Equals("!v")) { try {
 					if (interpretData[4].Equals("on")) v = true; else if (interpretData[4].Equals("off")) v = false; else write("PRIVMSG " + channel + " : use !v with on or off only", writer); }
-				catch { write("PRIVMSG " + channel + " : use !v with on or off only", writer); }
+				catch { write("PRIVMSG " + channel + " :use !v with on or off only", writer); }
         	}
 			else if (data.Equals("!gtfo")) {
     			Environment.ExitCode = 0;

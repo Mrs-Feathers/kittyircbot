@@ -4,11 +4,11 @@ using System.Runtime.CompilerServices;
 // Information about this assembly is defined by the following attributes. 
 // Change them to the values specific to your project.
 
-[assembly: AssemblyTitle("mysqlIRCbot")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("kittyIRCbot")]
+[assembly: AssemblyDescription("IRC bot with random features")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("")]
+[assembly: AssemblyProduct("kittyIRCbot")]
 [assembly: AssemblyCopyright("Katja")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
