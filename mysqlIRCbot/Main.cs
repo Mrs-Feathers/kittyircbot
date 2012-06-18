@@ -162,7 +162,7 @@ namespace mysqlIRCbot
 				String[] nick1 = interpretData[0].Split('!');
 				String[] nick2 = nick1[0].Split(':');
 				dbconnect.addtopic(topicstring, nick2[1]);
-				return "Topic: " + topicstring + " : was added by " + nick2[1];
+				return "Topic: " + topicstring + ": was added by " + nick2[1];
 			} else {
 				databaseMYSQL dbconnect = new databaseMYSQL(mysqlhostname, mysqlport, mysqlusername, mysqlpassword, database);    
 				return dbconnect.topic(randomnumber,stuff, otherstuff);
