@@ -23,21 +23,26 @@ namespace mysqlIRCbot
        
         }
 		
-		public string topic(int number) {
-        //MySqlCommand query = connection.CreateCommand();
-			//query.CommandText = "SELECT topic WHERE id = " + number + ";";  
+		public string topic (int number, string lolstuffiscool, string fivetwothree) {
+			string topic1 = ""; string CommandText;
+			if ((lolstuffiscool == null) && (lolstuffiscool != "name")) CommandText = "SELECT * FROM globaltopics WHERE topicid = " + number + ";";
+			else CommandText = "SELECT * FROM globaltopics WHERE topicid = " + Int32.Parse(lolstuffiscool) + ";";
+			MySqlCommand query = new MySqlCommand(CommandText,connection); //connection.CreateCommand(); 
             try {
-                //MySqlDataReader result = query.ExecuteReader();
-                //result.Close();
-				//string topic1 = result.GetString(1);
-                //connection.Close();
-				string lulzytime = Convert.ToString(number);
-				string topic1 = "the random number generated to pick the topic was: " + lulzytime;
+				MySqlDataReader result = query.ExecuteReader();
+				while (result.Read()) {
+					if (lolstuffiscool == null) topic1 += "12Topic " + number + " - ";
+					topic1 += (string)result["topic"];
+					if ((fivetwothree == "name")) topic1 = "topic " + lolstuffiscool + " was added by " + (string)result["nickname"] + ".";
+					
+				}
+				result.Close();
+                connection.Close();
 				return topic1;
             }
-            catch {
-            Console.WriteLine("ERROR: Unable to query database");
-			return "ERROR: Unable to query database";
+            catch (MySqlException e) {
+            Console.WriteLine("ERROR: " + e.ToString());
+			return "ERROR: " + e.ToString();
             }
         }
 		
@@ -60,6 +65,20 @@ namespace mysqlIRCbot
             catch (MySqlException e) {
             Console.WriteLine("ERROR: " + e.ToString());
 			return "ERROR: " + e.ToString();
+            }
+        }
+		
+		public string addtopic(string topic, string nick) {
+        MySqlCommand query = connection.CreateCommand();
+			query.CommandText = "INSERT INTO addedtopics (topic,nickname) VALUES ('" + topic + "', '" + nick + "');";  
+            try {
+                MySqlDataReader result = query.ExecuteReader();
+                result.Close();
+                connection.Close();
+				return "Success!";
+            } catch {
+            Console.WriteLine("ERROR: Unable to query database");
+				return "error";
             }
         }
     }

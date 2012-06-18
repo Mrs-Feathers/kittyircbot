@@ -14,6 +14,8 @@ namespace mysqlIRCbot
         public static int port, mysqlport;
 		public static bool v = true;
         public static String[] admins;
+		
+		public static int topicnumber = 1;
          
         public static TcpClient socket;
         public static StreamReader reader;
@@ -130,7 +132,7 @@ namespace mysqlIRCbot
             String now = String.Format("{0:F}", time);
             write("PRIVMSG " + channel + " :" + now, writer);
             }
-			else if (data.Equals("!help")) write("PRIVMSG " + channel + " :!help = this; !time = get the time; !info = get info; !v = turn +v on or off; !topic = get a random topic; !gtfo = exit; !literacy [country] = tells you the literacy rate of a given country. tells you a random one if no country provided; !dice [number] = rolls a dice with [number] sides; !sha1 [string] = encrypts a string to a sha1 hash; !pi [number] = calculates pi to a given number;", writer);
+			else if (data.Equals("!help")) write("PRIVMSG " + channel + " :!help = this; !time = get the time; !info = get info; !v = turn +v on or off; !topic [number] name = get a random topic or show specific topic by adding a number. adding 'name' shows you who wrote it; !gtfo = exit; !literacy [country] = tells you the literacy rate of a given country. tells you a random one if no country provided; !dice [number] = rolls a dice with [number] sides; !sha1 [string] = encrypts a string to a sha1 hash; !pi [number] = calculates pi to a given number;", writer);
 			else if (data.Equals("!v")) { try {
 					if (interpretData[4].Equals("on")) v = true; else if (interpretData[4].Equals("off")) v = false; else write("PRIVMSG " + channel + " : use !v with on or off only", writer); }
 				catch { write("PRIVMSG " + channel + " :use !v with on or off only", writer); }
@@ -139,7 +141,7 @@ namespace mysqlIRCbot
     			Environment.ExitCode = 0;
      			Environment.Exit(0);
   			}
-			else if (data.Equals("!topic")) write("PRIVMSG " + channel + " :" + lookuptopic(), writer);
+			else if (data.Equals("!topic")) try { write("PRIVMSG " + channel + " :" + lookuptopic(interpretData[4],interpretData[5]), writer); } catch { try { write("PRIVMSG " + channel + " :" + lookuptopic(interpretData[4],null), writer); } catch { write("PRIVMSG " + channel + " :" + lookuptopic(null,null), writer); } }
 			else if (data.Equals("!literacy")) try { write("PRIVMSG " + channel + " :" + lookupliteracy(interpretData[4]), writer); } catch { write("PRIVMSG " + channel + " :" + lookupliteracy(null), writer); }
 			else if (data.Equals("!dice")) try { write("PRIVMSG " + channel + " :" + rolldice(Int32.Parse(interpretData[4])), writer); } catch { write("PRIVMSG " + channel + " :" + rolldice(0), writer); }
 			else if (data.Equals("!sha1")) try { write("PRIVMSG " + channel + " :" + sha1stuff(interpretData[4]), writer); } catch { write("PRIVMSG " + channel + " :Sha1 hashing failed.", writer); }
@@ -152,10 +154,19 @@ namespace mysqlIRCbot
         write("PRIVMSG " + user + " :" + username + ": please use commands in " + channel, writer);
         }
         
-        static string lookuptopic() {
-			int randomnumber = new Random().Next(1001);
-                databaseMYSQL dbconnect = new databaseMYSQL(mysqlhostname, mysqlport, mysqlusername, mysqlpassword, database);    
-			return dbconnect.topic(randomnumber);
+        static string lookuptopic(string stuff, string otherstuff) {
+			int randomnumber = new Random().Next(1000); int nummber = topicnumber; string topicstring = "";
+			if (stuff == "add") {
+				databaseMYSQL dbconnect = new databaseMYSQL(mysqlhostname, mysqlport, mysqlusername, mysqlpassword, database);
+				for (int i=5; i < interpretData.Length; i++) {topicstring += interpretData[i] + " ";}
+				String[] nick1 = interpretData[0].Split('!');
+				String[] nick2 = nick1[0].Split(':');
+				dbconnect.addtopic(topicstring, nick2[1]);
+				return "Topic: " + topicstring + " : was added by " + nick2[1];
+			} else {
+				databaseMYSQL dbconnect = new databaseMYSQL(mysqlhostname, mysqlport, mysqlusername, mysqlpassword, database);    
+				return dbconnect.topic(randomnumber,stuff, otherstuff);
+			}
         }
 		
 		static string lookupliteracy(string stuff) {
