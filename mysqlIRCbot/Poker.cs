@@ -13,6 +13,7 @@ namespace mysqlIRCbot
 
 		public static int card1;
 		public static int card2;
+		public static int card3;
 
 		public static int center1;
 		public static int center2;
@@ -24,6 +25,7 @@ namespace mysqlIRCbot
 
 		public static string cardone;
 		public static string cardtwo;
+		public static string cardthree;
 
 		public static int centercard = 0;
 
@@ -32,20 +34,44 @@ namespace mysqlIRCbot
 
 		public static string next ()
 		{
-			do {card1 = rand.Next(53);} while ((card1 == center1) || (card1 == center2) || (card1 == center3) || (card1 == center4) || (card1 == center5) || (card1 == card2) || (card1 == player1.hand[0]) || (card1 == player1.hand[1]) || (card1 == player2.hand[0]) || (card1 == player2.hand[1]) || (card1 == player3.hand[0]) || (card1 == player3.hand[1]) || (card1 == player4.hand[0]) || (card1 == player4.hand[1]) || (card1 == player5.hand[0]) || (card1 == player5.hand[1]));
+			if (delt == true) {
+			do {card1 = rand.Next(53);} while ((card1 == card2) || (card1 == card3) || (card1 == center1) || (card1 == center2) || (card1 == center3) || (card1 == center4) || (card1 == center5) || (card1 == player1.hand[0]) || (card1 == player1.hand[1]) || (card1 == player2.hand[0]) || (card1 == player2.hand[1]) || (card1 == player3.hand[0]) || (card1 == player3.hand[1]) || (card1 == player4.hand[0]) || (card1 == player4.hand[1]) || (card1 == player5.hand[0]) || (card1 == player5.hand[1]));
+			do {card2 = rand.Next(53);} while ((card2 == card1) || (card2 == card3) || (card2 == center1) || (card2 == center2) || (card2 == center3) || (card2 == center4) || (card2 == center5) || (card2 == player1.hand[0]) || (card2 == player1.hand[1]) || (card2 == player2.hand[0]) || (card2 == player2.hand[1]) || (card2 == player3.hand[0]) || (card2 == player3.hand[1]) || (card2 == player4.hand[0]) || (card2 == player4.hand[1]) || (card2 == player5.hand[0]) || (card2 == player5.hand[1]));
+			do {card3 = rand.Next(53);} while ((card3 == card1) || (card3 == card2) || (card3 == center1) || (card3 == center2) || (card3 == center3) || (card3 == center4) || (card3 == center5) || (card3 == player1.hand[0]) || (card3 == player1.hand[1]) || (card3 == player2.hand[0]) || (card3 == player2.hand[1]) || (card3 == player3.hand[0]) || (card3 == player3.hand[1]) || (card3 == player4.hand[0]) || (card3 == player4.hand[1]) || (card3 == player5.hand[0]) || (card3 == player5.hand[1]));
 			if (centercard < 5)
 			{
-				if (centercard == 0) center1 = card1;
-				else if (centercard == 1) center2 = card1; //1-3 the flop. 4 the turn. 5 the river.
-				else if (centercard == 2) center3 = card1;
-				else if (centercard == 3) center4 = card1;
-				else if (centercard == 4) center5 = card1;
-				databaseMYSQL dbconnect = new databaseMYSQL(ircbot.mysqlhostname, ircbot.mysqlport, ircbot.mysqlusername, ircbot.mysqlpassword, ircbot.database);
-				cardone = dbconnect.cardlookup(card1);
-				centercard++;
-
-				return cardone;
+				if (centercard == 0) 
+				{
+					databaseMYSQL dbconnect1 = new databaseMYSQL(ircbot.mysqlhostname, ircbot.mysqlport, ircbot.mysqlusername, ircbot.mysqlpassword, ircbot.database);
+					center1 = card1;
+					cardone = dbconnect1.cardlookup(card1);
+					databaseMYSQL dbconnect2 = new databaseMYSQL(ircbot.mysqlhostname, ircbot.mysqlport, ircbot.mysqlusername, ircbot.mysqlpassword, ircbot.database);
+					center2 = card2; //1-3 the flop. 4 the turn. 5 the river.
+					cardtwo = dbconnect2.cardlookup(card2);
+					databaseMYSQL dbconnect3 = new databaseMYSQL(ircbot.mysqlhostname, ircbot.mysqlport, ircbot.mysqlusername, ircbot.mysqlpassword, ircbot.database);
+					center3 = card3;
+					cardthree = dbconnect3.cardlookup(card3);
+					centercard = 3;
+					return "The flop: " + cardone + " " + cardtwo + " " + cardthree;
+				}
+				else if (centercard == 3) 
+				{
+					databaseMYSQL dbconnect = new databaseMYSQL(ircbot.mysqlhostname, ircbot.mysqlport, ircbot.mysqlusername, ircbot.mysqlpassword, ircbot.database);
+					center4 = card1;
+					cardone = dbconnect.cardlookup(card1);
+					centercard++;
+					return "The turn: " + cardone;
+				}
+				else if (centercard == 4) 
+				{
+					databaseMYSQL dbconnect = new databaseMYSQL(ircbot.mysqlhostname, ircbot.mysqlport, ircbot.mysqlusername, ircbot.mysqlpassword, ircbot.database);
+					center5 = card1;
+					cardone = dbconnect.cardlookup(card1);
+					centercard++;
+					return "The river: " + cardone;
+				} else return "error";
 			} else return "i should show you everyone's cards here"; //show cards and tell people to end
+			} else return "you need to deal first";
 		}
 
 		public static void deal ()
@@ -108,6 +134,7 @@ namespace mysqlIRCbot
 
 		public static void join (string nick)
 		{
+			if (delt == false) {
 			if (started == true) {
 			if ((nick != player1.name) && (nick != player2.name) && (nick != player3.name) && (nick != player4.name) && (nick != player5.name))
 			{
@@ -135,6 +162,7 @@ namespace mysqlIRCbot
 			} else ircbot.write("PRIVMSG " + ircbot.channel + " :only 5 players allowed!", ircbot.writer);
 			} else ircbot.write("PRIVMSG " + ircbot.channel + " :you can't join twice!", ircbot.writer);
 			} else ircbot.write("PRIVMSG " + ircbot.channel + " :not started yet!", ircbot.writer);
+			} else ircbot.write("PRIVMSG " + ircbot.channel + " :game already in progress!", ircbot.writer);
 		}
 
 		public static void clear ()
@@ -145,11 +173,13 @@ namespace mysqlIRCbot
 
 			cardone = "";
 			cardtwo = "";
+			cardthree = "";
 
 			centercard = 0;
 
 			card1 = 0;
 			card2 = 0;
+			card3 = 0;
 
 			center1 = 0;
 			center2 = 0;

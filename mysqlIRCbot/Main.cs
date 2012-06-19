@@ -163,13 +163,13 @@ namespace mysqlIRCbot
 			switch (stuff)
 			{
 			case "end":
-				write("PRIVMSG " + channel + " :This is the end of the game.", writer);
+				write("PRIVMSG " + channel + " :This is the end of the round. type '!poker start' for another.", writer);
 				//show points
 				Poker.clear();
 				write("PRIVMSG " + channel + " :I should show you your points here, but that hasn't been implemented yet.", writer);
 				break;
 			case "next":
-				write("PRIVMSG " + channel + " :The next card is: " + Poker.next(), writer);
+				write("PRIVMSG " + channel + " :" + Poker.next(), writer);
 				break;
 			case "deal":
 				Poker.deal();

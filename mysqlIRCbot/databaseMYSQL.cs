@@ -53,7 +53,7 @@ namespace mysqlIRCbot
             try {
 				MySqlDataReader result = query.ExecuteReader();
 				while (result.Read()) {
-					cardreturn = (string)result["card"];
+					cardreturn = "12" + (string)result["card"] + "";
 				}
 				result.Close();
                 connection.Close();
