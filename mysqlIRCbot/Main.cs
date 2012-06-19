@@ -132,7 +132,7 @@ namespace mysqlIRCbot
             String now = String.Format("{0:F}", time);
             write("PRIVMSG " + channel + " :" + now, writer);
             }
-			else if (data.Equals("!help")) write("PRIVMSG " + channel + " :!help = this; !time = get the time; !info = get info; !v = turn +v on or off; !topic [number] name = get a random topic or show specific topic by adding a number. adding 'name' shows you who wrote it; !topic add [topic] = this will add a topic to a list we can approve; !gtfo = exit; !literacy [country] = tells you the literacy rate of a given country. tells you a random one if no country provided; !dice [number] = rolls a dice with [number] sides; !sha1 [string] = encrypts a string to a sha1 hash; !pi [number] = calculates pi to a given number;", writer);
+			else if (data.Equals("!help")) write("PRIVMSG " + channel + " :!help = this; !time = get the time; !info = get info; !v = turn +v on or off; !topic [number] name = get a random topic or show specific topic by adding a number. adding 'name' shows you who wrote it; !topic add [topic] = this will add a topic to a list we can approve; !gtfo = exit; !literacy [country] = tells you the literacy rate of a given country. tells you a random one if no country provided; !dice [number] = rolls a dice with [number] sides; !sha1 [string] = encrypts a string to a sha1 hash; !pi [number] = calculates pi to a given number; !poker = to play texas hold 'em poker;", writer);
 			else if (data.Equals("!v")) { try {
 					if (interpretData[4].Equals("on")) v = true; else if (interpretData[4].Equals("off")) v = false; else write("PRIVMSG " + channel + " : use !v with on or off only", writer); }
 				catch { write("PRIVMSG " + channel + " :use !v with on or off only", writer); }
@@ -146,12 +146,37 @@ namespace mysqlIRCbot
 			else if (data.Equals("!dice")) try { write("PRIVMSG " + channel + " :" + rolldice(Int32.Parse(interpretData[4])), writer); } catch { write("PRIVMSG " + channel + " :" + rolldice(0), writer); }
 			else if (data.Equals("!sha1")) try { write("PRIVMSG " + channel + " :" + sha1stuff(interpretData[4]), writer); } catch { write("PRIVMSG " + channel + " :Sha1 hashing failed.", writer); }
 			else if (data.Equals("!pi")) try { CalculatePI myPI = new CalculatePI (Int32.Parse(interpretData[4])); } catch { write("PRIVMSG " + channel + " :3.14", writer); }
+			else if (data.Equals("!poker")) try { pokerstuff(interpretData[4],interpretData[5]); } catch { try { pokerstuff(interpretData[4],null); } catch { pokerstuff(null,null); } }
 		}
 		
         static void onPrivateMessage(String user, String data) {
         String[] sender = user.Split('!');
         user = sender[0].Substring(1);
         write("PRIVMSG " + user + " :" + username + ": please use commands in " + channel, writer);
+        }
+
+		static void pokerstuff(string stuff, string otherstuff) {
+			String[] nick1 = interpretData[0].Split('!');
+			String[] nick2 = nick1[0].Split(':');
+			String nick = nick2[1];
+			if (stuff == "end") {
+				write("PRIVMSG " + channel + " :This is the end of the game.", writer);
+				//show points
+				Poker.clear();
+				write("PRIVMSG " + channel + " :I should show you your points here, but that hasn't been implemented yet.", writer);
+			} else if (stuff == "next") {
+				//get next card from deck
+				write("PRIVMSG " + channel + " :The next card is: ", writer);
+			} else if (stuff == "deal") {
+				Poker.deal();
+			} else if (stuff == "start") {
+				Poker.clear();
+				write("PRIVMSG " + channel + " :please type '!poker join' to join", writer);
+			} else if (stuff == "join") {
+				Poker.join(nick);
+			} else {
+				write("PRIVMSG " + channel + " :please type '!poker start' to start, '!poker join' to join, '!poker deal' to deal, '!poker next' for the next card, and '!poker end' to end the game", writer);
+			}
         }
         
         static string lookuptopic(string stuff, string otherstuff) {

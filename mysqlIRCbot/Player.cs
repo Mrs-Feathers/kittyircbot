@@ -4,14 +4,13 @@ namespace mysqlIRCbot
 	public class Player
 	{
 		public string name;
-		public Array hand;
+		public int[] hand;
 		public int points;
 		
-		public Player (string name_, Array hand_, int points_)
+		public Player ()
 		{
-			name = name_;
-			hand = hand_;
-			points = points_;
+			hand[0] = 0;
+			hand[1] = 0;
 		}
 	}
 }
