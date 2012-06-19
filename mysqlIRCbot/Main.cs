@@ -159,23 +159,31 @@ namespace mysqlIRCbot
 			String[] nick1 = interpretData[0].Split('!');
 			String[] nick2 = nick1[0].Split(':');
 			String nick = nick2[1];
-			if (stuff == "end") {
+
+			switch (stuff)
+			{
+			case "end":
 				write("PRIVMSG " + channel + " :This is the end of the game.", writer);
 				//show points
 				Poker.clear();
 				write("PRIVMSG " + channel + " :I should show you your points here, but that hasn't been implemented yet.", writer);
-			} else if (stuff == "next") {
-				//get next card from deck
-				write("PRIVMSG " + channel + " :The next card is: ", writer);
-			} else if (stuff == "deal") {
+				break;
+			case "next":
+				write("PRIVMSG " + channel + " :The next card is: " + Poker.next(), writer);
+				break;
+			case "deal":
 				Poker.deal();
-			} else if (stuff == "start") {
+				break;
+			case "start":
 				Poker.clear();
 				write("PRIVMSG " + channel + " :please type '!poker join' to join", writer);
-			} else if (stuff == "join") {
+				break;
+			case "join":
 				Poker.join(nick);
-			} else {
+				break;
+			default:
 				write("PRIVMSG " + channel + " :please type '!poker start' to start, '!poker join' to join, '!poker deal' to deal, '!poker next' for the next card, and '!poker end' to end the game", writer);
+				break;			
 			}
         }
         

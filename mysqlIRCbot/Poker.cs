@@ -20,9 +20,15 @@ namespace mysqlIRCbot
 		{
 		}
 
+		public static string next ()
+		{
+			//next card here
+			return "not implemented yet.";
+		}
+
 		public static void deal ()
 		{
-			if (delt = false) {
+			if (delt == false) {
 			for (int i = 1; i <= 5; i++)
 			{
 				do {card1 = new Random().Next(53);} while ((card1 == player1.hand[0]) || (card1 == player1.hand[1]) || (card1 == player2.hand[0]) || (card1 == player2.hand[1]) || (card1 == player3.hand[0]) || (card1 == player3.hand[1]) || (card1 == player4.hand[0]) || (card1 == player4.hand[1]) || (card1 == player5.hand[0]) || (card1 == player5.hand[1]));
