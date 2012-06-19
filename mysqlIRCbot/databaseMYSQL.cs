@@ -46,23 +46,16 @@ namespace mysqlIRCbot
             }
         }
 
-		public string cardlookup (int card1, int card2) {
+		public string cardlookup (int card) {
 			string cardreturn = "";
-			string CommandText1 = "SELECT card FROM cards WHERE cardid = " + card1 + ";";
-			string CommandText2 = "SELECT card FROM cards WHERE cardid = " + card2 + ";";
-			MySqlCommand query1 = new MySqlCommand(CommandText1,connection);
+			string CommandText = "SELECT card FROM cards WHERE cardid = " + card + ";";
+			MySqlCommand query = new MySqlCommand(CommandText,connection);
             try {
-				MySqlDataReader result1 = query1.ExecuteReader();
-				while (result1.Read()) {
-					cardreturn += (string)result1["card"] + " and ";
+				MySqlDataReader result = query.ExecuteReader();
+				while (result.Read()) {
+					cardreturn = (string)result["card"];
 				}
-				result1.Close();
-				MySqlCommand query2 = new MySqlCommand(CommandText2,connection);
-				MySqlDataReader result2 = query2.ExecuteReader();
-				while (result2.Read()) {
-					cardreturn += (string)result2["card"];
-				}
-				result2.Close();
+				result.Close();
                 connection.Close();
 				return cardreturn;
             }

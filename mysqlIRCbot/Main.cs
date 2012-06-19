@@ -177,6 +177,7 @@ namespace mysqlIRCbot
 			case "start":
 				Poker.clear();
 				write("PRIVMSG " + channel + " :please type '!poker join' to join", writer);
+				Poker.started = true;
 				break;
 			case "join":
 				Poker.join(nick);
