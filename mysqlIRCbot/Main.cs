@@ -203,8 +203,8 @@ namespace mysqlIRCbot
 			{
 			case "end":
 				write("PRIVMSG " + channel + " :This is the end of the round. type '!poker start' for another.", writer);
-				//show points
 				Poker.clear();
+				//show points
 				write("PRIVMSG " + channel + " :I should show you your points here, but that hasn't been implemented yet.", writer);
 				break;
 			case "next":

@@ -70,7 +70,45 @@ namespace mysqlIRCbot
 					centercard++;
 					return "The river: " + cardone;
 				} else return "error";
-			} else return "i should show you everyone's cards here"; //show cards and tell people to end
+			} else if (centercard == 5) {
+					if (player1.name != "") {
+						databaseMYSQL dbconnect = new databaseMYSQL(ircbot.mysqlhostname, ircbot.mysqlport, ircbot.mysqlusername, ircbot.mysqlpassword, ircbot.database);
+						cardone = dbconnect.cardlookup(player1.hand[0]);
+						databaseMYSQL dbconnect2 = new databaseMYSQL(ircbot.mysqlhostname, ircbot.mysqlport, ircbot.mysqlusername, ircbot.mysqlpassword, ircbot.database);
+						cardtwo = dbconnect2.cardlookup(player1.hand[1]);
+						ircbot.write("PRIVMSG " + ircbot.channel + " :" + player1.name + "'s cards are " + cardone + " and " + cardtwo, ircbot.writer);
+					}
+					if (player2.name != "") {
+						databaseMYSQL dbconnect = new databaseMYSQL(ircbot.mysqlhostname, ircbot.mysqlport, ircbot.mysqlusername, ircbot.mysqlpassword, ircbot.database);
+						cardone = dbconnect.cardlookup(player2.hand[0]);
+						databaseMYSQL dbconnect2 = new databaseMYSQL(ircbot.mysqlhostname, ircbot.mysqlport, ircbot.mysqlusername, ircbot.mysqlpassword, ircbot.database);
+						cardtwo = dbconnect2.cardlookup(player2.hand[1]);
+						ircbot.write("PRIVMSG " + ircbot.channel + " :" + player2.name + "'s cards are " + cardone + " and " + cardtwo, ircbot.writer);
+					}
+					if (player3.name != "") {
+						databaseMYSQL dbconnect = new databaseMYSQL(ircbot.mysqlhostname, ircbot.mysqlport, ircbot.mysqlusername, ircbot.mysqlpassword, ircbot.database);
+						cardone = dbconnect.cardlookup(player3.hand[0]);
+						databaseMYSQL dbconnect2 = new databaseMYSQL(ircbot.mysqlhostname, ircbot.mysqlport, ircbot.mysqlusername, ircbot.mysqlpassword, ircbot.database);
+						cardtwo = dbconnect2.cardlookup(player3.hand[1]);
+						ircbot.write("PRIVMSG " + ircbot.channel + " :" + player3.name + "'s cards are " + cardone + " and " + cardtwo, ircbot.writer);
+					}
+					if (player4.name != "") {
+						databaseMYSQL dbconnect = new databaseMYSQL(ircbot.mysqlhostname, ircbot.mysqlport, ircbot.mysqlusername, ircbot.mysqlpassword, ircbot.database);
+						cardone = dbconnect.cardlookup(player4.hand[0]);
+						databaseMYSQL dbconnect2 = new databaseMYSQL(ircbot.mysqlhostname, ircbot.mysqlport, ircbot.mysqlusername, ircbot.mysqlpassword, ircbot.database);
+						cardtwo = dbconnect2.cardlookup(player4.hand[1]);
+						ircbot.write("PRIVMSG " + ircbot.channel + " :" + player4.name + "'s cards are " + cardone + " and " + cardtwo, ircbot.writer);
+					}
+					if (player5.name != "") {
+						databaseMYSQL dbconnect = new databaseMYSQL(ircbot.mysqlhostname, ircbot.mysqlport, ircbot.mysqlusername, ircbot.mysqlpassword, ircbot.database);
+						cardone = dbconnect.cardlookup(player5.hand[0]);
+						databaseMYSQL dbconnect2 = new databaseMYSQL(ircbot.mysqlhostname, ircbot.mysqlport, ircbot.mysqlusername, ircbot.mysqlpassword, ircbot.database);
+						cardtwo = dbconnect2.cardlookup(player5.hand[1]);
+						ircbot.write("PRIVMSG " + ircbot.channel + " :" + player5.name + "'s cards are " + cardone + " and " + cardtwo, ircbot.writer);
+					}
+					centercard++;
+					return "end of game!";
+				} else return "you need to end the game and show the points with '!poker end'";
 			} else return "you need to deal first";
 		}
 
