@@ -64,7 +64,101 @@ namespace mysqlIRCbot
 			return "ERROR: " + e.ToString();
             }
         }
-		
+
+		public string welcomelookup (string nick) {
+			string welcome = "";
+			string CommandText = "SELECT * FROM welcomemessages WHERE nick = '" + nick + "';";
+			MySqlCommand query = new MySqlCommand(CommandText,connection);
+            try {
+				MySqlDataReader result = query.ExecuteReader();
+				while (result.Read()) {
+					welcome = (string)result["message"];
+				}
+				result.Close();
+                connection.Close();
+				return welcome;
+            }
+            catch (MySqlException e) {
+            Console.WriteLine("ERROR: " + e.ToString());
+			return "ERROR: " + e.ToString();
+            }
+        }
+
+		public string welcomeadd(string nick, string message) {
+        MySqlCommand query = connection.CreateCommand();
+			query.CommandText = "INSERT INTO welcomemessages (nick,message) VALUES ('" + nick + "', '" + message + "');";  
+            try {
+                MySqlDataReader result = query.ExecuteReader();
+                result.Close();
+                connection.Close();
+				return "Success!";
+            } catch {
+            Console.WriteLine("ERROR: Unable to query database");
+				return "error. don't use apostrophies.";
+            }
+        }
+
+		public string welcomeupdate(string nick, string message) {
+        MySqlCommand query = connection.CreateCommand();
+			query.CommandText = "UPDATE welcomemessages SET message = '" + message + "' WHERE nick = '" + nick + "';";  
+            try {
+                MySqlDataReader result = query.ExecuteReader();
+                result.Close();
+                connection.Close();
+				return "Success!";
+            } catch {
+            Console.WriteLine("ERROR: Unable to query database");
+				return "error";
+            }
+        }
+
+		public string desclookup (string nick) {
+			string welcome = "";
+			string CommandText = "SELECT * FROM descriptions WHERE nick = '" + nick + "';";
+			MySqlCommand query = new MySqlCommand(CommandText,connection);
+            try {
+				MySqlDataReader result = query.ExecuteReader();
+				while (result.Read()) {
+					welcome = (string)result["description"];
+				}
+				result.Close();
+                connection.Close();
+				return welcome;
+            }
+            catch (MySqlException e) {
+            Console.WriteLine("ERROR: " + e.ToString());
+			return "ERROR: " + e.ToString();
+            }
+        }
+
+		public string descadd(string nick, string message) {
+        MySqlCommand query = connection.CreateCommand();
+			query.CommandText = "INSERT INTO descriptions (nick,description) VALUES ('" + nick + "', '" + message + "');";  
+            try {
+                MySqlDataReader result = query.ExecuteReader();
+                result.Close();
+                connection.Close();
+				return "Success!";
+            } catch {
+            Console.WriteLine("ERROR: Unable to query database");
+				return "error. don't use apostrophies.";
+            }
+        }
+
+		public string descupdate(string nick, string message) {
+        MySqlCommand query = connection.CreateCommand();
+			query.CommandText = "UPDATE descriptions SET description = '" + message + "' WHERE nick = '" + nick + "';";  
+            try {
+                MySqlDataReader result = query.ExecuteReader();
+                result.Close();
+                connection.Close();
+				return "Success!";
+            } catch {
+            Console.WriteLine("ERROR: Unable to query database");
+				return "error. don't use apostrophies.";
+            }
+        }
+
 		public string literacy(int number, string lolstuffiscool) {
 			string country = ""; string rate = ""; string literacyrate = "ERROR: unset variable"; string CommandText;
 			if (lolstuffiscool == null) CommandText = "SELECT * FROM literacy WHERE id = " + number + ";";
