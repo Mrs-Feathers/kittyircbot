@@ -1,6 +1,6 @@
 using System;
 using System.Threading;
-namespace mysqlIRCbot
+namespace kittyIRCbot
 {
 	public class CalculatePI
 {

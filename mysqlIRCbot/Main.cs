@@ -8,18 +8,20 @@ using System.Security.Cryptography;
 using System.Timers;
 using System.Collections.Generic;
 
-namespace mysqlIRCbot
+namespace kittyIRCbot
 {  
     public class ircbot {
         public static String username, nickpassword, hostname, description, channel;
         public static String mysqlhostname, mysqlusername, mysqlpassword, database;
-        public static int port, mysqlport;
+        public static int port, mysqlport, botsetting;
 		public static bool v = true;
         public static List<string> admins = new List<string>();
 
 		
 		public static int topicnumber = 0;
 		public static int topicmax = 969;
+
+		public static double maxxp = 1000000;
 
 		public static System.Timers.Timer topictime = new System.Timers.Timer(60000);
 		public static bool allowtopic = true;
@@ -34,6 +36,8 @@ namespace mysqlIRCbot
 			topictime.Elapsed += new ElapsedEventHandler(topictime_Elapsed);
             try {
             loadConfig();
+			databaseMYSQL dbconnect = new databaseMYSQL(mysqlhostname, mysqlport, mysqlusername, mysqlpassword, database);
+			dbconnect.init(botsetting);
             socket = new TcpClient(hostname, port);
             socket.ReceiveBufferSize = 1024;
             Console.WriteLine("Connected :3");
@@ -72,6 +76,7 @@ namespace mysqlIRCbot
                 if (interpretData[2].Equals(channel)) {
 					if (interpretData.Length == 3) interpretData[4] = " ";
                     onPublicMessage(interpretData[3]);
+					gainxp();
                 }
                 else if (interpretData[2].Equals(username)) {
                     onPrivateMessage(interpretData[0], interpretData[3]);
@@ -88,19 +93,12 @@ namespace mysqlIRCbot
                 string[] lines = File.ReadAllLines("config.cfg");
                 foreach (string line in lines) {
                 string[] data = line.Split(':');
-                if (data[0].Equals("username")) username = data[1];
-				else if (data[0].Equals("nickpassword")) nickpassword = data[1];
-                else if (data[0].Equals("hostname")) hostname = data[1];
-                else if (data[0].Equals("mysqlusername")) mysqlusername = data[1];
+                if (data[0].Equals("mysqlusername")) mysqlusername = data[1];
                 else if (data[0].Equals("database")) database = data[1];
                 else if (data[0].Equals("mysqlpassword")) mysqlpassword = data[1];
                 else if (data[0].Equals("mysqlhostname")) mysqlhostname = data[1];
-                else if (data[0].Equals("description")) description = data[1];
-                else if (data[0].Equals("channel")) channel = data[1];
-                else if (data[0].Equals("port")) port = Int32.Parse(data[1]);
-                else if (data[0].Equals("mysqlport")) mysqlport = Int32.Parse(data[1]);
-				else if (data[0].Equals("admins")) adminsadd(data);
-				else if (data[0].Equals("topicnumber")) topicnumber = Int32.Parse(data[1]);
+				else if (data[0].Equals("mysqlport")) mysqlport = Int32.Parse(data[1]);
+				else if (data[0].Equals("botsetting")) botsetting = Int32.Parse(data[1]);
                 }
             }
             catch {
@@ -137,6 +135,9 @@ namespace mysqlIRCbot
         }
 
 		static void onPublicMessage(string data) {
+			String[] nick3 = interpretData[0].Split('!');
+			String[] nick4 = nick3[0].Split(':');
+			String nick44 = nick4[1];
             data = data.Substring(1);
             if (data.Equals("!info")) write("PRIVMSG " + channel + " :kittyIRCbot v1.0 written by auroriumoxide katja.decuir@gmail.com", writer);
             else if (data.Equals("!time")) {
@@ -144,7 +145,7 @@ namespace mysqlIRCbot
             String now = String.Format("{0:F}", time);
             write("PRIVMSG " + channel + " :" + now, writer);
             }
-			else if (data.Equals("!help")) { write("PRIVMSG " + channel + " :!help = this; !time = get the time; !info = get info; !v = turn +v on or off; !topicrand = random topic; !topic [number] name = get a topic or show specific topic by adding a number. adding 'name' shows you who wrote it; !topic add [topic] = this will add a topic to a list we can approve; !gtfo = exit; !literacy [country] = tells you the literacy rate of a given country. tells you a random one if no country provided;", writer); write("PRIVMSG " + channel + " :!dice [number] = rolls a dice with [number] sides; !sha1 [string] = encrypts a string to a sha1 hash; !pi [number] = calculates pi to a given number; !poker = to play texas hold 'em poker; !welcome [message] = will create a welcome message for you; !desc [name] or !desc update [message] = gives a description about someone or updates your description;", writer); }
+			else if (data.Equals("!help")) { write("PRIVMSG " + nick44 + " :!help = this; !time = get the time; !info = get info; !v = turn +v on or off; !topicrand = random topic; !topic [number] name = get a topic or show specific topic by adding a number. adding 'name' shows you who wrote it; !topic add [topic] = this will add a topic to a list we can approve; !gtfo = exit; !literacy [country] = tells you the literacy rate of a given country. tells you a random one if no country provided;", writer); write("PRIVMSG " + nick44 + " :!dice [number] = rolls a dice with [number] sides; !sha1 [string] = encrypts a string to a sha1 hash; !pi [number] = calculates pi to a given number; !poker = to play texas hold 'em poker; !welcome [message] = will create a welcome message for you; !desc [name] or !desc update [message] = gives a description about someone or updates your description;", writer); write("PRIVMSG " + nick44 + " :!echo = make the bot say something in channel; !act = make the bot /me something in the channel; !stats [nick] = see someone's XP stats; nickmapping = please ask auroriumoxide to map your name to your main nick; !topstats = see a top ten list of the people with the highest xp points; !showawards = show awards won; !showawards notwon = shows awards that no one has won;", writer); write("PRIVMSG " + nick44 + " :!award [nick] [award #] [reason] = awards an award to someone; !enc [key] [message] = use a stream cipher to encrypt a message with a key; !dec [key] [message] = use a stream cipher to decrypt a message with a key;", writer);}
 			else if (data.Equals("!v")) { try { String[] nick1 = interpretData[0].Split('!'); String[] nick2 = nick1[0].Split(':'); String nick = nick2[1];
 					if (interpretData[4].Equals("on") && admins.Contains(nick)) v = true; else if (interpretData[4].Equals("off") && admins.Contains(nick)) v = false; else write("PRIVMSG " + channel + " : use !v with on or off only", writer); }
 				catch { write("PRIVMSG " + channel + " :use !v with on or off only", writer); }
@@ -162,6 +163,13 @@ namespace mysqlIRCbot
 			else if (data.Equals("!pi")) try { CalculatePI myPI = new CalculatePI (Int32.Parse(interpretData[4])); } catch { write("PRIVMSG " + channel + " :3.14", writer); }
 			else if (data.Equals("!poker")) try { pokerstuff(interpretData[4],interpretData[5]); } catch { try { pokerstuff(interpretData[4],null); } catch { pokerstuff(null,null); } }
 			else if (data.Equals("!welcome")) try { write("PRIVMSG " + channel + " :" + welcome(), writer); string stuff = interpretData[4]; } catch { write("PRIVMSG " + channel + " :failed.", writer); }
+			else if (data.Equals("!echo")) try { write("PRIVMSG " + channel + " :" + echo(), writer); } catch { write("PRIVMSG " + channel + " :For some reason, you suck at not failing.", writer); }
+			else if (data.Equals("!act")) try { write("PRIVMSG " + channel + " :" + (char)1 + "ACTION " + echo() + (char)1, writer); } catch { write("PRIVMSG " + channel + " :For some reason, you suck at not failing.", writer); }
+			else if (data.Equals("!stats")) { try { write("PRIVMSG " + channel + " :" + getstats(interpretData[4]), writer); } catch { write("PRIVMSG " + channel + " :" + getstats(null), writer); } }
+			else if (data.Equals("!topstats")) try { topten(); } catch { write("PRIVMSG " + nick44 + " :Error", writer); }
+			else if (data.Equals("!showawards")) { try { showawards(interpretData[4]); } catch { showawards(null); }}
+			else if (data.Equals("!enc")) { try { write("PRIVMSG " + channel + " :" + encrypt(interpretData[4]), writer); string stuff = interpretData[5]; } catch { write("PRIVMSG " + channel + " :use: !enc [key] [message]", writer); } }
+			else if (data.Equals("!dec")) { try { write("PRIVMSG " + channel + " :" + StreamCipher.decrypt(interpretData[4],interpretData[5]), writer); } catch { write("PRIVMSG " + channel + " :use: !dec [key] [message]", writer); } }
 		}
 		
         static void onPrivateMessage(String user, String data) {
@@ -174,7 +182,7 @@ namespace mysqlIRCbot
             String now = String.Format("{0:F}", time);
             write("PRIVMSG " + user + " :" + now, writer);
             }
-			else if (data.Equals("!help")) { write("PRIVMSG " + user + " :!help = this; !time = get the time; !info = get info; !v = turn +v on or off; !topicrand = random topic; !topic [number] name = get a topic or show specific topic by adding a number. adding 'name' shows you who wrote it; !topic add [topic] = this will add a topic to a list we can approve; !gtfo = exit; !literacy [country] = tells you the literacy rate of a given country. tells you a random one if no country provided;", writer); write("PRIVMSG " + user + " :!dice [number] = rolls a dice with [number] sides; !sha1 [string] = encrypts a string to a sha1 hash; !pi [number] = calculates pi to a given number; !poker = to play texas hold 'em poker; !welcome [message] = will create a welcome message for you; !desc [name] or !desc update [message] = gives a description about someone or updates your description;", writer); }
+			else if (data.Equals("!help")) { write("PRIVMSG " + user + " :!help = this; !time = get the time; !info = get info; !v = turn +v on or off; !topicrand = random topic; !topic [number] name = get a topic or show specific topic by adding a number. adding 'name' shows you who wrote it; !topic add [topic] = this will add a topic to a list we can approve; !gtfo = exit; !literacy [country] = tells you the literacy rate of a given country. tells you a random one if no country provided;", writer); write("PRIVMSG " + user + " :!dice [number] = rolls a dice with [number] sides; !sha1 [string] = encrypts a string to a sha1 hash; !pi [number] = calculates pi to a given number; !poker = to play texas hold 'em poker; !welcome [message] = will create a welcome message for you; !desc [name] or !desc update [message] = gives a description about someone or updates your description;", writer); write("PRIVMSG " + user + " :!echo = make the bot say something in channel; !act = make the bot /me something in the channel; !stats [nick] = see someone's XP stats; nickmapping = please ask auroriumoxide to map your name to your main nick; !topstats = see a top ten list of the people with the highest xp points; !showawards = show awards won; !showawards notwon = shows awards that no one has won;", writer); write("PRIVMSG " + user + " :!award [nick] [award #] [reason] = awards an award to someone; !enc [key] [message] = use a stream cipher to encrypt a message with a key; !dec [key] [message] = use a stream cipher to decrypt a message with a key;", writer);}
 			else if (data.Equals("!v")) { try { String[] nick1 = interpretData[0].Split('!'); String[] nick2 = nick1[0].Split(':'); String nick = nick2[1];
 					if (interpretData[4].Equals("on") && admins.Contains(nick)) v = true; else if (interpretData[4].Equals("off") && admins.Contains(nick)) v = false; else write("PRIVMSG " + user + " : use !v with on or off only", writer); }
 				catch { write("PRIVMSG " + user + " :use !v with on or off only", writer); }
@@ -192,7 +200,14 @@ namespace mysqlIRCbot
 			else if (data.Equals("!topicrand")) write("PRIVMSG " + user + " :Only use !topicrand in the main channel", writer);
 			else if (data.Equals("!poker")) write("PRIVMSG " + user + " :Only use !poker in the main channel", writer);
 			else if (data.Equals("!welcome")) try { write("PRIVMSG " + user + " :" + welcome(), writer); string stuff = interpretData[4]; } catch { write("PRIVMSG " + user + " :failed.", writer); }
-        }
+			else if (data.Equals("!echo")) try { write("PRIVMSG " + channel + " :" + echo(), writer); } catch { write("PRIVMSG " + user + " :For some reason, you suck at not failing.", writer); }
+			else if (data.Equals("!act")) try { write("PRIVMSG " + channel + " :" + (char)1 + "ACTION " + echo() + (char)1, writer); } catch { write("PRIVMSG " + user + " :For some reason, you suck at not failing.", writer); }
+        	else if (data.Equals("!stats")) { try { write("PRIVMSG " + user + " :" + getstats(interpretData[4]), writer); } catch { write("PRIVMSG " + user + " :" + getstats(null), writer); } }
+			else if (data.Equals("!topstats")) try { topten(); } catch { write("PRIVMSG " + user + " :Error", writer); }
+			else if (data.Equals("!showawards")) { try { showawards(interpretData[4]); } catch { showawards(null); } }
+			else if (data.Equals("!enc")) { try { write("PRIVMSG " + user + " :" + encrypt(interpretData[4]), writer); string stuff = interpretData[5]; } catch { write("PRIVMSG " + user + " :use: !enc [key] [message]", writer); } }
+			else if (data.Equals("!dec")) { try { write("PRIVMSG " + user + " :" + StreamCipher.decrypt(interpretData[4],interpretData[5]), writer); } catch { write("PRIVMSG " + user + " :use: !dec [key] [message]", writer); } }
+		}
 
 		static void pokerstuff(string stuff, string otherstuff) {
 			String[] nick1 = interpretData[0].Split('!');
@@ -226,6 +241,74 @@ namespace mysqlIRCbot
 				break;			
 			}
         }
+
+		static string encrypt(string key)
+		{
+			string message = "";
+			for (int i=5; i < interpretData.Length; i++) {message += interpretData[i] + " ";}
+			return StreamCipher.encrypt(key, message);
+		}
+
+		static string echo () {
+			String[] nick1 = interpretData[0].Split('!');
+			String[] nick2 = nick1[0].Split(':');
+			String nick = nick2[1];
+			string echostring = "";
+			DateTime now = DateTime.Now;
+			for (int i=4; i < interpretData.Length; i++) {echostring += interpretData[i] + " ";}
+			databaseMYSQL dbconnect = new databaseMYSQL(mysqlhostname, mysqlport, mysqlusername, mysqlpassword, database);    
+			dbconnect.addecho(nick,echostring,now);
+			return echostring;
+		}
+
+		static void showawards (string stuff)
+		{
+			String[] nick1 = interpretData[0].Split('!');
+			String[] nick2 = nick1[0].Split(':');
+			String nick = nick2[1];
+			databaseMYSQL dbconnect = new databaseMYSQL(mysqlhostname, mysqlport, mysqlusername, mysqlpassword, database);    
+			if (stuff == "notwon") { dbconnect.showawardsnotwon(nick); } else {dbconnect.showawards(nick);}
+		}
+
+		static void topten ()
+		{
+			String[] nick1 = interpretData[0].Split('!');
+			String[] nick2 = nick1[0].Split(':');
+			String nick = nick2[1];
+			databaseMYSQL dbconnect = new databaseMYSQL(mysqlhostname, mysqlport, mysqlusername, mysqlpassword, database);    
+			dbconnect.topten(nick);
+		}
+
+		static void gainxp () {
+			String[] nick1 = interpretData[0].Split('!');
+			String[] nick2 = nick1[0].Split(':');
+			String nick = nick2[1];
+			databaseMYSQL dbconnect2 = new databaseMYSQL(mysqlhostname, mysqlport, mysqlusername, mysqlpassword, database);    
+			string nick3;
+			try {nick3 = dbconnect2.getmain(nick);} catch {nick3 = "";}
+			if (nick3 != "") nick = nick3;
+			string[] echostring = new string[interpretData.Length - 3];
+			int x = 0;
+			double xp = 0;
+			double xp2 = 0;
+			for (int i=3; i < interpretData.Length; i++) {echostring[x] = interpretData[i] + " "; x++;}
+			databaseMYSQL dbconnect = new databaseMYSQL(mysqlhostname, mysqlport, mysqlusername, mysqlpassword, database);    
+			try {xp = dbconnect.getxp(nick); xp2 = xp;} catch {xp = 0;}
+			databaseMYSQL dbconnect1 = new databaseMYSQL(mysqlhostname, mysqlport, mysqlusername, mysqlpassword, database);    
+			double hello = 0;
+			if ((xp == 0)) {try {dbconnect1.addxp(nick,echostring.Length);} catch {Console.WriteLine("error");}}
+			try {hello = xp + echostring.Length;} catch {try {dbconnect1.addxp(nick,echostring.Length);} catch {Console.WriteLine("error");}}
+			xp = hello;
+			string infostuffs = "";
+			try {if (Calculatelevel(xp) == 1) {
+					databaseMYSQL dbconnect12 = new databaseMYSQL(mysqlhostname, mysqlport, mysqlusername, mysqlpassword, database);
+					string linkstuff = dbconnect12.levelonelinklookup(botsetting);
+					infostuffs = " For more information, visit" + linkstuff;
+				
+				} 
+				if (Calculatelevel(xp2) != Calculatelevel(xp)) write("PRIVMSG " + channel + " :" + nick + " is now at level " + Calculatelevel(xp) + infostuffs, writer);} catch {Console.WriteLine("parse error");}
+			try {dbconnect1.updatexp(nick,xp);} catch {try {dbconnect1.addxp(nick,xp);} catch {Console.WriteLine("error");}}
+		}
         
         static string lookuptopic(string stuff, string otherstuff) {
 			int randomnumber = new Random().Next(1000); int nummber = topicnumber; string topicstring = "";
@@ -239,7 +322,7 @@ namespace mysqlIRCbot
 			} else {
 				topicnumber++;
 				if (topicnumber > topicmax) topicnumber = 1;
-				changetopicnumber(topicnumber);
+				changetopicnumber();
 				databaseMYSQL dbconnect = new databaseMYSQL(mysqlhostname, mysqlport, mysqlusername, mysqlpassword, database);    
 				return dbconnect.topic(topicnumber,stuff, otherstuff);
 			}
@@ -252,23 +335,64 @@ namespace mysqlIRCbot
 				for (int i=5; i < interpretData.Length; i++) {descriptionstring += interpretData[i] + " ";}
 				String[] nick1 = interpretData[0].Split('!');
 				String[] nick2 = nick1[0].Split(':');
-				if ((dbconnect.desclookup(nick2[1]) != "") && (descriptionstring != " ") && (descriptionstring != "")) 
+				string nick = nick2[1];
+				databaseMYSQL dbconnect2 = new databaseMYSQL(mysqlhostname, mysqlport, mysqlusername, mysqlpassword, database);    
+				string nick3;
+				try {nick3 = dbconnect2.getmain(nick);} catch {nick3 = "";}
+			if (nick3 != "") nick = nick3;
+				if ((dbconnect.desclookup(nick) != "") && (descriptionstring != " ") && (descriptionstring != "")) 
 				{
 					databaseMYSQL dbconnect1 = new databaseMYSQL(mysqlhostname, mysqlport, mysqlusername, mysqlpassword, database);
-					return dbconnect1.descupdate(nick2[1],descriptionstring);
+					return dbconnect1.descupdate(nick,descriptionstring);
 				} else if ((descriptionstring != " ") && (descriptionstring != "")) {
 					databaseMYSQL dbconnect1 = new databaseMYSQL(mysqlhostname, mysqlport, mysqlusername, mysqlpassword, database);
-					return dbconnect1.descadd(nick2[1],descriptionstring);
-				} else return nick2[1] + ": you need to type something after !desc update";
+					return dbconnect1.descadd(nick,descriptionstring);
+				} else return nick + ": you need to type something after !desc update";
 			} else {
 				String[] nick1 = interpretData[0].Split('!');
 				String[] nick2 = nick1[0].Split(':');
+				string nick = nick2[1];
+				databaseMYSQL dbconnect2 = new databaseMYSQL(mysqlhostname, mysqlport, mysqlusername, mysqlpassword, database);    
+				string nick3;
+				try {nick3 = dbconnect2.getmain(nick);} catch {nick3 = "";}
+			if (nick3 != "") nick = nick3;
 				string hellohowareyou = "";
-				if (stuff == null) hellohowareyou = nick2[1]; else hellohowareyou = stuff;
+				if (stuff == null) hellohowareyou = nick; else hellohowareyou = stuff;
 				databaseMYSQL dbconnect = new databaseMYSQL(mysqlhostname, mysqlport, mysqlusername, mysqlpassword, database);    
 				return hellohowareyou + ": " + dbconnect.desclookup(hellohowareyou);
 			}
         }
+
+				static string getstats(string stuff) {
+				String[] nick1 = interpretData[0].Split('!');
+				String[] nick2 = nick1[0].Split(':');
+				string nick = nick2[1];
+				databaseMYSQL dbconnect2 = new databaseMYSQL(mysqlhostname, mysqlport, mysqlusername, mysqlpassword, database);    
+			string nick3;	
+			try { nick3 = dbconnect2.getmain(nick);} catch { nick3 = "";}
+				if (nick3 != "") nick = nick3;
+				string hellohowareyou = "";
+				if (stuff == null) hellohowareyou = nick; else hellohowareyou = stuff;
+				databaseMYSQL dbconnect = new databaseMYSQL(mysqlhostname, mysqlport, mysqlusername, mysqlpassword, database);
+				double xp;
+			try { xp = dbconnect.getxp(hellohowareyou); } catch {xp = 0;}
+			double level = Calculatelevel(xp);
+			return hellohowareyou + ": 12Level: " + level + " 12XP: " + xp + " 12XP needed for next level: " + CalculateXP(level, xp);
+        }
+
+		static double Calculatelevel (double xp)
+		{
+			for (double i = 0; i < 100; i++)
+			{
+				if ((xp > (maxxp*((i)/100))) && (xp < (maxxp*((i+1)/100)))) {return i+1;}
+			}
+			return 0;
+		}
+
+		static double CalculateXP (double level, double xp)
+		{
+			return (maxxp*((level)/100)) - xp;
+		}
 
 		static string welcome ()
 		{
@@ -277,14 +401,19 @@ namespace mysqlIRCbot
 			for (int i=4; i < interpretData.Length; i++) {welcomestring += interpretData[i] + " ";}
 			String[] nick1 = interpretData[0].Split('!');
 			String[] nick2 = nick1[0].Split(':');
-			if ((dbconnect.welcomelookup(nick2[1]) != "") && (welcomestring != " ") && (welcomestring != "")) 
+			string nick = nick2[1];
+			databaseMYSQL dbconnect2 = new databaseMYSQL(mysqlhostname, mysqlport, mysqlusername, mysqlpassword, database);    
+			string nick3;
+			try { nick3 = dbconnect2.getmain(nick);} catch { nick3 = "";}
+			if (nick3 != "") nick = nick3;
+			if ((dbconnect.welcomelookup(nick) != "") && (welcomestring != " ") && (welcomestring != "")) 
 			{
 				databaseMYSQL dbconnect1 = new databaseMYSQL(mysqlhostname, mysqlport, mysqlusername, mysqlpassword, database);
-				return dbconnect1.welcomeupdate(nick2[1],welcomestring);
+				return dbconnect1.welcomeupdate(nick,welcomestring);
 			} else if ((welcomestring != " ") && (welcomestring != "")) {
 				databaseMYSQL dbconnect1 = new databaseMYSQL(mysqlhostname, mysqlport, mysqlusername, mysqlpassword, database);
-				return dbconnect1.welcomeadd(nick2[1],welcomestring);
-			} else return nick2[1] + ": you need to type something after !welcome";
+				return dbconnect1.welcomeadd(nick,welcomestring);
+			} else return nick + ": you need to type something after !welcome";
 		}
 
 		static string lookuptopicrand(string stuff, string otherstuff) {
@@ -324,7 +453,7 @@ namespace mysqlIRCbot
 			topictime.Enabled = false;
 		}
 
-		static void adminsadd (string[] adminstoadd)
+		public static void adminsadd (string[] adminstoadd)
 		{
 			foreach (string a in adminstoadd)
 			{
@@ -332,14 +461,13 @@ namespace mysqlIRCbot
 			}
 		}
 
-		static void changetopicnumber (int stuff) {
+		static void changetopicnumber () {
 		try {
-                string[] lines = File.ReadAllLines("config.cfg");
-		 		lines[12] = "topicnumber:" + topicnumber;
-				File.WriteAllLines("config.cfg",lines);
+                databaseMYSQL dbconnect = new databaseMYSQL(mysqlhostname, mysqlport, mysqlusername, mysqlpassword, database);    
+				dbconnect.topicchange(topicnumber);
             }
             catch {
-            Console.WriteLine("Cannot read configuration file, are you sure it is there?");
+            Console.WriteLine("cannot connect to database, bitch.");
             }
 		}
     }
