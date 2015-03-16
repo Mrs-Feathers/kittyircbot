@@ -1,0 +1,1 @@
+an irc bot that connects to a mysql database.. it also uses a configuration file.
